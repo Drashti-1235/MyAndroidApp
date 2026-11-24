@@ -1,26 +1,22 @@
+
 package com.example.aistudymate.data.repository
 
-class QuizRepository {
+import com.example.aistudymate.data.local.QuizDao
+import com.example.aistudymate.data.local.QuizEntity
+import kotlinx.coroutines.flow.Flow
 
-    private val quizzes = mutableListOf<Quiz>()
-
-    fun addQuiz(quiz: Quiz) {
-        quizzes.add(quiz)
+class QuizRepository(
+    private val quizDao: QuizDao
+) {
+    fun getAllQuizzes(): Flow<List<QuizEntity>> {
+        return quizDao.getAllQuizzes()
     }
 
-    fun getAllQuizzes(): List<Quiz> {
-        return quizzes.toList()
+    suspend fun insertQuiz(quiz: QuizEntity) {
+        quizDao.insertQuiz(quiz)
     }
 
-    fun getQuizById(id: String): Quiz? {
-        return quizzes.find { it.id == id }
-    }
-
-    fun deleteQuiz(id: String) {
-        quizzes.removeAll { it.id == id }
-    }
-
-    fun getQuizCount(): Int {
-        return quizzes.size
+    suspend fun deleteQuiz(quiz: QuizEntity) {
+        quizDao.deleteQuiz(quiz)
     }
 }

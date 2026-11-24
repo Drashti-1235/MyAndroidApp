@@ -1,4 +1,7 @@
+
 package com.example.aistudymate.data.repository
+
+import com.example.aistudymate.data.model.User
 
 class AuthRepository {
 
@@ -28,9 +31,5 @@ class AuthRepository {
 
     fun logout() {
         currentUser = null
-    }
-
-    fun getCurrentUser(): User? {
-        return currentUser
     }
 }

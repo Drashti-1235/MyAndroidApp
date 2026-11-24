@@ -1,8 +1,11 @@
+
 package com.example.aistudymate.data.repository
+
+import com.example.aistudymate.data.model.Progress
+
 class ProgressRepository {
 
-    private val progressList =
-        mutableListOf<Progress>()
+    private val progressList = mutableListOf<Progress>()
 
     fun saveProgress(progress: Progress) {
         val index = progressList.indexOfFirst {

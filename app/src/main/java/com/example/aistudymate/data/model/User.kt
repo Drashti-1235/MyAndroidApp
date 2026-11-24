@@ -1,9 +1,9 @@
+
 package com.example.aistudymate.data.model
 
 data class User(
-    val id: String = "",
-    val name: String = "",
-    val email: String = "",
-    val profileImageUrl: String = "",
-    val createdAt: Long = System.currentTimeMillis()
+    val id: Int = 0,
+    val name: String,
+    val email: String,
+    val password: String
 )

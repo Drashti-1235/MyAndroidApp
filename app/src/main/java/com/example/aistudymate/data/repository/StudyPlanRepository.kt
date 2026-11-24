@@ -1,4 +1,7 @@
+
 package com.example.aistudymate.data.repository
+
+import com.example.aistudymate.data.model.StudyPlan
 
 class StudyPlanRepository {
 
@@ -23,6 +26,8 @@ class StudyPlanRepository {
     }
 
     fun deletePlan(id: String) {
-        plans.removeAll { it.id == id }
+        plans.removeAll {
+            it.id == id
+        }
     }
 }

@@ -1,32 +1,26 @@
+
 package com.example.aistudymate.data.repository
 
-class NoteRepository {
+import com.example.aistudymate.data.local.NoteDao
+import com.example.aistudymate.data.local.NoteEntity
+import kotlinx.coroutines.flow.Flow
 
-    private val notes = mutableListOf<Note>()
-
-    fun addNote(note: Note) {
-        notes.add(note)
+class NoteRepository(
+    private val noteDao: NoteDao
+) {
+    fun getAllNotes(): Flow<List<NoteEntity>> {
+        return noteDao.getAllNotes()
     }
 
-    fun getAllNotes(): List<Note> {
-        return notes.toList()
+    suspend fun insertNote(note: NoteEntity) {
+        noteDao.insertNote(note)
     }
 
-    fun getNoteById(id: String): Note? {
-        return notes.find { it.id == id }
+    suspend fun updateNote(note: NoteEntity) {
+        noteDao.updateNote(note)
     }
 
-    fun updateNote(updatedNote: Note) {
-        val index = notes.indexOfFirst {
-            it.id == updatedNote.id
-        }
-
-        if (index != -1) {
-            notes[index] = updatedNote
-        }
-    }
-
-    fun deleteNote(id: String) {
-        notes.removeAll { it.id == id }
+    suspend fun deleteNote(note: NoteEntity) {
+        noteDao.deleteNote(note)
     }
 }

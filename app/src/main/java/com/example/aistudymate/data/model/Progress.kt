@@ -1,12 +1,11 @@
+
 package com.example.aistudymate.data.model
 
 data class Progress(
-    val id: String = "",
-    val userId: String = "",
-    val totalQuizzes: Int = 0,
-    val completedQuizzes: Int = 0,
-    val totalQuestions: Int = 0,
-    val correctAnswers: Int = 0,
-    val studyHours: Float = 0f,
+    val id: Int = 0,
+    val userId: String,
+    val completedTasks: Int = 0,
+    val totalTasks: Int = 0,
+    val studyTimeMinutes: Int = 0,
     val updatedAt: Long = System.currentTimeMillis()
 )

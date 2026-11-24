@@ -1,9 +1,11 @@
+
 package com.example.aistudymate.data.repository
+
+import com.example.aistudymate.data.model.ChatMessage
 
 class ChatRepository {
 
-    private val messages =
-        mutableListOf<ChatMessage>()
+    private val messages = mutableListOf<ChatMessage>()
 
     fun sendMessage(message: ChatMessage) {
         messages.add(message)
