@@ -1,4 +1,3 @@
-
 package com.example.aistudymate.data.repository
 
 import com.example.aistudymate.data.local.QuizDao
@@ -8,9 +7,9 @@ import kotlinx.coroutines.flow.Flow
 class QuizRepository(
     private val quizDao: QuizDao
 ) {
-    fun getAllQuizzes(): Flow<List<QuizEntity>> {
-        return quizDao.getAllQuizzes()
-    }
+
+    val allQuizzes: Flow<List<QuizEntity>> =
+        quizDao.getAllQuizzes()
 
     suspend fun insertQuiz(quiz: QuizEntity) {
         quizDao.insertQuiz(quiz)

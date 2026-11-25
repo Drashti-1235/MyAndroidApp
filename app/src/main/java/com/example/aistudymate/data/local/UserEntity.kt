@@ -1,7 +1,5 @@
+
 package com.example.aistudymate.data.local
-
-
-
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -12,5 +10,6 @@ data class UserEntity(
     val id: Int = 0,
     val name: String,
     val email: String,
-    val password: String
+    val password: String,
+    val profileImage: String? = null
 )

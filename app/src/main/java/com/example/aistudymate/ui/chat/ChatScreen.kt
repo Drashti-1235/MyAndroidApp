@@ -1,4 +1,3 @@
-
 package com.example.aistudymate.ui.chat
 
 import androidx.compose.foundation.layout.*
@@ -8,6 +7,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.aistudymate.data.local.ChatDao
+import com.example.aistudymate.data.local.ChatEntity
 import com.example.aistudymate.data.model.ChatMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,22 +17,99 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 
 private val httpClient = OkHttpClient()
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(onBack: () -> Unit) {
+fun ChatScreen(
+    chatDao: ChatDao,
+    onBack: () -> Unit,
+    existingChatId: Int? = null
+) {
 
     var message by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
+    var chatId by remember { mutableStateOf(existingChatId) }
 
     val messages = remember {
         mutableStateListOf<ChatMessage>()
     }
 
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(existingChatId) {
+
+        messages.clear()
+        chatId = existingChatId
+
+        if (existingChatId != null) {
+
+            val savedChat = chatDao.getChatById(existingChatId)
+
+            if (savedChat != null) {
+
+                val jsonArray = JSONArray(savedChat.messagesJson)
+
+                for (i in 0 until jsonArray.length()) {
+
+                    val item = jsonArray.getJSONObject(i)
+
+                    messages.add(
+                        ChatMessage(
+                            message = item.getString("message"),
+                            isUser = item.getBoolean("isUser")
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun saveConversation() {
+
+        scope.launch {
+
+            val jsonArray = JSONArray()
+
+            messages.forEach { chatMessage ->
+
+                jsonArray.put(
+                    JSONObject()
+                        .put("message", chatMessage.message)
+                        .put("isUser", chatMessage.isUser)
+                )
+            }
+
+            val title = messages
+                .firstOrNull { it.isUser }
+                ?.message
+                ?.take(40)
+                ?: "New Chat"
+
+            val now = System.currentTimeMillis()
+
+            val chat = ChatEntity(
+                id = chatId ?: 0,
+                chatTitle = title,
+                messagesJson = jsonArray.toString(),
+                createdAt = now,
+                updatedAt = now
+            )
+
+            if (chatId == null) {
+
+                val newId = chatDao.insertChat(chat)
+                chatId = newId.toInt()
+
+            } else {
+
+                chatDao.updateChat(chat)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -44,24 +122,24 @@ fun ChatScreen(onBack: () -> Unit) {
                 }
             )
         }
-    ) { paddingValues ->
+    ) { padding ->
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(padding)
                 .padding(16.dp)
         ) {
 
             Text(
-                text = "Ask your study questions!",
+                "Ask your study questions!",
                 style = MaterialTheme.typography.titleLarge
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             if (messages.isEmpty()) {
-                Text("No messages yet. Start your conversation!")
+                Text("Start your conversation!")
             }
 
             LazyColumn(
@@ -70,24 +148,26 @@ fun ChatScreen(onBack: () -> Unit) {
                     .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+
                 items(messages) { chatMessage ->
 
                     Card(
                         modifier = Modifier.fillMaxWidth()
                     ) {
+
                         Column(
                             modifier = Modifier.padding(12.dp)
                         ) {
+
                             Text(
-                                text = if (chatMessage.isUser) {
-                                    "You"
-                                } else {
-                                    "AI Assistant"
-                                },
+                                if (chatMessage.isUser) "You"
+                                else "AI Assistant",
                                 style = MaterialTheme.typography.labelLarge
                             )
 
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(
+                                modifier = Modifier.height(4.dp)
+                            )
 
                             Text(chatMessage.message)
                         }
@@ -96,9 +176,11 @@ fun ChatScreen(onBack: () -> Unit) {
             }
 
             if (isLoading) {
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+
                     CircularProgressIndicator()
                     Text("AI is thinking...")
                 }
@@ -121,6 +203,7 @@ fun ChatScreen(onBack: () -> Unit) {
 
                 Button(
                     onClick = {
+
                         val question = message.trim()
 
                         if (question.isNotEmpty() && !isLoading) {
@@ -136,9 +219,12 @@ fun ChatScreen(onBack: () -> Unit) {
                             isLoading = true
 
                             scope.launch {
+
                                 try {
 
-                                    val answer = withContext(Dispatchers.IO) {
+                                    val answer = withContext(
+                                        Dispatchers.IO
+                                    ) {
 
                                         val json = JSONObject()
                                             .put("message", question)
@@ -150,7 +236,9 @@ fun ChatScreen(onBack: () -> Unit) {
                                             )
 
                                         val request = Request.Builder()
-                                            .url("http://10.0.2.2:5001/chat")
+                                            .url(
+                                                "http://10.0.2.2:5001/chat"
+                                            )
                                             .post(body)
                                             .build()
 
@@ -159,22 +247,24 @@ fun ChatScreen(onBack: () -> Unit) {
                                             .use { response ->
 
                                                 val responseText =
-                                                    response.body?.string() ?: ""
+                                                    response.body?.string()
+                                                        ?: ""
 
                                                 if (!response.isSuccessful) {
                                                     throw Exception(
-                                                        JSONObject(responseText)
-                                                            .optString(
-                                                                "error",
-                                                                "Server error"
-                                                            )
+                                                        JSONObject(
+                                                            responseText
+                                                        ).optString(
+                                                            "error",
+                                                            "Server error"
+                                                        )
                                                     )
                                                 }
 
                                                 JSONObject(responseText)
                                                     .optString(
                                                         "reply",
-                                                        "AI did not return an answer."
+                                                        "No answer received."
                                                     )
                                             }
                                     }
@@ -191,14 +281,17 @@ fun ChatScreen(onBack: () -> Unit) {
                                     messages.add(
                                         ChatMessage(
                                             message = "Error: ${
-                                                e.message ?: "Unable to connect to AI."
+                                                e.message ?: "Unable to connect"
                                             }",
                                             isUser = false
                                         )
                                     )
 
                                 } finally {
+
                                     isLoading = false
+
+                                    saveConversation()
                                 }
                             }
                         }

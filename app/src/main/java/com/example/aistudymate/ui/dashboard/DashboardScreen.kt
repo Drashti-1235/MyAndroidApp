@@ -30,7 +30,8 @@ fun DashboardScreen(
     onQuizClick: () -> Unit = {},
     onPlannerClick: () -> Unit = {},
     onProgressClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onStudyMaterialsClick: () -> Unit = {}
 ) {
 
     Scaffold(
@@ -88,6 +89,12 @@ fun DashboardScreen(
                 title = "📝 Quiz",
                 description = "Test your knowledge",
                 onClick = onQuizClick
+            )
+
+            DashboardCard(
+                title = "📖 Study Materials",
+                description = "Upload and read your PDF study materials",
+                onClick = onStudyMaterialsClick
             )
 
             DashboardCard(
